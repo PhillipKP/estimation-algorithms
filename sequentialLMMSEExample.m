@@ -1,12 +1,20 @@
 % This script demonstrates the squential linear minimum mean squared error
 % in the case of scalar observations
-%
-% We are trying to estimate the 
 % 
+% As an important special case, an easy to use recursive expression can 
+% be derived when at each m-th time instant the underlying linear
+% observation process yields a scalar such that 
+% y(m) =a(:,m)'*x +z(m)
+% a(:,m) is n by 1 known row vector whose values can change with each 
+% measurement m. x is n-by-1 column vector to be estimated, and 
+% z(m)  is scalar noise term with variance sigma^2
+% 
+% See the wikipedia 
 % Phillip K Poon
 % ppoon@optics.arizona.edu
 % 29 Jun 2016
-%
+
+clear all
 
 %% User Defined Variables
 
@@ -16,29 +24,33 @@
 n = 50
 
 % The number of measurements aka observations
-numMeas = 3000
+numMeas = 1000
 
-noiseStd = 1
+% The standard deviation of the noise that we want to add to our
+% measurements
+noiseStd = 10
 
-% Initialize the sground truth signal
+%% Initialize some stuff like...
+
+% Initialize the ground truth signal
 x = randn(n,1);
-
 
 % Initialize measurement matrix a. The columns of the vector will be used 
 % to form projections with the signal x (aka inner products). The number 
 % of columns is equal to the number of measurements. 
 a = randn(n,numMeas);
 
-%% Initial several variables
-
 % The matrix where we store the estimated signals
 xhat = [];
 
-% Initialize first loop for sequential LMMSE
+
+%% The first loop for sequential LMMSE
 m = 1
 
+noiseVal = noiseStd*randn(1);
+
 % The first observation aka measurement
-y(m) = a(:,m)'*x + noiseStd*randn(1)
+y(m) = a(:,m)'*x + noiseVal;
 
 % The first estimate is just 0. 
 xhat(:,m) = 0*ones(n,1);
@@ -49,7 +61,8 @@ Ce = eye(n);
 
 % Initialize the weights
 k = [];
-
+lsErrorList = [];
+mmseErrorList = [];
 
 % Begin measurement and estimation loop
 for m = 2:numMeas
@@ -76,7 +89,8 @@ for m = 2:numMeas
     % Update the covariance matrix
     Ce = (eye(n) - k(:,m) * a(:,m)') * Ce;
     
-    % The new estimation
+    % The new estimation is the old estimate plus the weighted factor on
+    % the data last agreement term.
     xhat(:,m) = xhat(:,m-1) + ...
         k(:,m) * ( y(m) - a(:,m)' * xhat(:,m-1) );
     
@@ -108,6 +122,7 @@ for m = 2:numMeas
     % the same answer. 
     
     H(m,:) = a(:,m)';
+    
     %g(m) = h(m,:)*x + noiseTerm;
     g = y';
     
