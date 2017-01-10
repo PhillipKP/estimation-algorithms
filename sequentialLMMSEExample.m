@@ -11,7 +11,7 @@
 % 
 % See the wikipedia 
 % Phillip K Poon
-% ppoon@optics.arizona.edu
+% ppoon@email.arizona.edu
 % 29 Jun 2016
 
 clear all
